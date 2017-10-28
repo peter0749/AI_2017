@@ -150,7 +150,34 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  from collections import deque
+  initState = problem.getStartState() ## coord
+  if problem.isGoalState(initState):
+      return []
+  pa = {initState:None}
+  queue = deque() ## not limit the size
+  goalState = None
+  solution = []
+  queue.append(initState) ## current
+  while len(queue)>0 and goalState is None:
+      currState = queue.popleft() ## queue behavior
+      nextStates = problem.getSuccessors(currState)
+      for node, Dir, _ in nextStates:
+          if not node in pa:
+              pa[node] = (currState, Dir) #bt
+              if problem.isGoalState(node):
+                  goalState = node
+                  break
+              queue.append(node)
+  del queue
+  if not goalState is None:
+    currState = goalState
+    while currState in pa and not pa[currState] is None:
+        (lastState, Dir) = pa[currState]
+        solution.insert(0, Dir)
+        currState = lastState
+    return solution
+  return []
 
 def nullHeuristic(state, problem=None):
   """
@@ -176,7 +203,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
   fScore[initState]=heuristic(initState,problem) ## estimated
   heapq.heappush(queue, (fScore[initState], initState))
   while len(queue)>0 and goalState is None:
-      score, currState = heapq.heappop(queue) ## queue behavior
+      score, currState = heapq.heappop(queue) ## min heap behavior
       if score>fScore[currState]: continue ## out-dated information
       nextStates = problem.getSuccessors(currState)
       for node, Dir, _ in nextStates:
