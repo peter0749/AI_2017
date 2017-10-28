@@ -162,7 +162,41 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
   "Search the node that has the lowest combined cost and heuristic first."
   "*** YOUR CODE HERE ***"
-  util.raiseNotDefined()
+  import heapq
+  initState = problem.getStartState() ## coord
+  if problem.isGoalState(initState):
+      return []
+  pa = {initState:None}
+  fScore = dict()
+  gScore = dict()
+  queue = [] ## not limit the size
+  goalState = None
+  solution = []
+  gScore[initState]=0 ## real
+  fScore[initState]=heuristic(initState,problem) ## estimated
+  heapq.heappush(queue, (fScore[initState], initState))
+  while len(queue)>0 and goalState is None:
+      score, currState = heapq.heappop(queue) ## queue behavior
+      if score>fScore[currState]: continue ## out-dated information
+      nextStates = problem.getSuccessors(currState)
+      for node, Dir, _ in nextStates:
+          if node in pa: continue ## explored new node
+          gScore[node] = gScore[currState]+1
+          fScore[node] = gScore[node] + heuristic(node,problem)
+          pa[node] = (currState, Dir) #bt
+          if problem.isGoalState(node):
+              goalState = node
+              break
+          heapq.heappush(queue,(fScore[node], node))
+  del queue
+  if not goalState is None:
+    currState = goalState
+    while currState in pa and not pa[currState] is None:
+        (lastState, Dir) = pa[currState]
+        solution.insert(0, Dir)
+        currState = lastState
+    return solution
+  return []
 
 
 # Abbreviations
