@@ -150,25 +150,29 @@ def breadthFirstSearch(problem):
 def uniformCostSearch(problem):
   "Search the node of least total cost first. "
   "*** YOUR CODE HERE ***"
-  from collections import deque
+  import heapq
   initState = problem.getStartState() ## coord
   if problem.isGoalState(initState):
       return []
   pa = {initState:None}
-  queue = deque() ## not limit the size
+  gScore = dict()
+  queue = [] ## not limit the size
   goalState = None
   solution = []
-  queue.append(initState) ## current
+  gScore[initState]=0 ## real
+  heapq.heappush(queue, (gScore[initState], initState))
   while len(queue)>0 and goalState is None:
-      currState = queue.popleft() ## queue behavior
+      score, currState = heapq.heappop(queue) ## min heap behavior
+      if score>gScore[currState]: continue ## out-dated information
       nextStates = problem.getSuccessors(currState)
-      for node, Dir, _ in nextStates:
-          if not node in pa:
-              pa[node] = (currState, Dir) #bt
-              if problem.isGoalState(node):
-                  goalState = node
-                  break
-              queue.append(node)
+      for node, Dir, cost in nextStates:
+          if node in pa: continue ## explored new node
+          gScore[node] = gScore[currState]+cost
+          pa[node] = (currState, Dir) #bt
+          if problem.isGoalState(node):
+              goalState = node
+              break
+          heapq.heappush(queue,(gScore[node], node))
   del queue
   if not goalState is None:
     currState = goalState
@@ -206,9 +210,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
       score, currState = heapq.heappop(queue) ## min heap behavior
       if score>fScore[currState]: continue ## out-dated information
       nextStates = problem.getSuccessors(currState)
-      for node, Dir, _ in nextStates:
+      for node, Dir, cost in nextStates:
           if node in pa: continue ## explored new node
-          gScore[node] = gScore[currState]+1
+          gScore[node] = gScore[currState]+cost
           fScore[node] = gScore[node] + heuristic(node,problem)
           pa[node] = (currState, Dir) #bt
           if problem.isGoalState(node):
