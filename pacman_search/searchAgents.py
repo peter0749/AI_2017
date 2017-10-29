@@ -473,7 +473,25 @@ def foodHeuristic(state, problem):
   """
   position, foodGrid = state
   "*** YOUR CODE HERE ***"
-  return 0
+  x, y = position
+  entered = False
+  dist = 0
+  minx = 1e9
+  maxx = -1e9
+  miny = 1e9
+  maxy = -1e9
+  for i, v in enumerate(foodGrid.asList()):
+      if foodGrid[v[0]][v[1]]==0: continue ## already visited
+      entered = True
+      minx = min(minx, v[0])
+      maxx = max(maxx, v[0])
+      miny = min(miny, v[1])
+      maxy = max(maxy, v[1])
+  if not entered: return 0
+  dist += min(abs(minx-x),abs(x-maxx))
+  dist += min(abs(miny-y),abs(y-maxy))
+  dist += maxx-minx+maxy-miny
+  return dist # Default to trivial solution
 
 class ClosestDotSearchAgent(SearchAgent):
   "Search for all food using a sequence of searches"
