@@ -364,6 +364,7 @@ def cornersHeuristic(state, problem):
   walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
   "*** YOUR CODE HERE ***"
+  '''
   x, y = state[0]
   entered = False
   dist = 0
@@ -383,6 +384,25 @@ def cornersHeuristic(state, problem):
   dist += min(abs(miny-y),abs(y-maxy))
   dist += maxx-minx+maxy-miny
   return dist # Default to trivial solution
+  '''
+  L1 = lambda a,b: abs(a[0]-b[0])+abs(a[1]-b[1])
+  total = 0
+  coin = state[1]
+  coinList = [ corners[i] for i,v in enumerate(coin) if v==0 ]
+  crr = state[0]
+  while len(coinList)>0:
+      mindist = float('Inf')
+      minidx  = None
+      for i,v in enumerate(coinList):
+          dist = L1(v,crr)
+          if dist<mindist:
+              mindist = dist
+              minidx = i
+      if not minidx is None:
+          total += mindist
+          crr = coinList[minidx]
+          del coinList[minidx]
+  return total
 
 class AStarCornersAgent(SearchAgent):
   "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -473,6 +493,7 @@ def foodHeuristic(state, problem):
   """
   position, foodGrid = state
   "*** YOUR CODE HERE ***"
+  '''
   x, y = position
   entered = False
   dist = 0
@@ -492,6 +513,24 @@ def foodHeuristic(state, problem):
   dist += min(abs(miny-y),abs(y-maxy))
   dist += maxx-minx+maxy-miny
   return dist # Default to trivial solution
+  '''
+  L1 = lambda a,b: abs(a[0]-b[0])+abs(a[1]-b[1])
+  coinList = foodGrid.asList()
+  total = 0
+  crr = position
+  while len(coinList)>0:
+      mindist = float('Inf')
+      minidx  = None
+      for i,v in enumerate(coinList):
+          dist = L1(v,crr)
+          if dist<mindist:
+              mindist = dist
+              minidx = i
+      if not minidx is None:
+          total += mindist
+          crr = coinList[minidx]
+          del coinList[minidx]
+  return total
 
 class ClosestDotSearchAgent(SearchAgent):
   "Search for all food using a sequence of searches"
