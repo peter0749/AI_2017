@@ -18,8 +18,8 @@ int main(int argc, char **argv) {
     for (int i=0; i<n_queen; ++i) {
         int j=0;
         for (; j<result.second[i]; ++j) cout << "0 ";
-        cout << "1 ";
-        for (; j<n_queen; ++j) cout << "0 ";
+        cout << "1 "; 
+        for (++j; j<n_queen; ++j) cout << "0 ";
         cout << endl;
     }
     cout << "#attack: " << result.first << endl;
