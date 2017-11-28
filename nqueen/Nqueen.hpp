@@ -10,17 +10,14 @@
 
 class Problem {
     public:
-        Problem(Solver *solver, int queen_num);
-        virtual std::pair<int, std::vector<int> > solve(void)=0; // solve the n-queen problem and return (#attack, final state)
+        Problem(void);
+        virtual std::pair<int, std::vector<int> > solve(Solver *solver, int queen_num)=0; // solve the n-queen problem and return (#attack, final state)
 };
 
 class Nqueen:public Problem {
-    private:
-        Solver *solver;
-        int queen_n;
     public:
-        Nqueen(Solver *solver, int queen_num);
-        std::pair<int, std::vector<int> > solve(void);
+        Nqueen(void);
+        std::pair<int, std::vector<int> > solve(Solver *solver, int queen_num);
 };
 
 #endif

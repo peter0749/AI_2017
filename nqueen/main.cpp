@@ -12,9 +12,10 @@ int main(int argc, char **argv) {
     srand(time(NULL));
     if (argc<2) return 1;
     int n_queen = atoi(argv[1]);
+    Nqueen nq;
     HillClimbing HC;
-    Nqueen nq(&HC, n_queen);
-    pair<int, vector<int> > result = nq.solve();
+    // GA ga; // not implment yet
+    pair<int, vector<int> > result = nq.solve(&HC, n_queen);
     for (int i=0; i<n_queen; ++i) {
         int j=0;
         for (; j<result.second[i]; ++j) cout << "0 ";
