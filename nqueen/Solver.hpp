@@ -9,8 +9,6 @@ class Solver {
         Solver(void);
         Solver(const Solver &ref); // You need to complete copy assianment
         std::vector<int> run(int queen_num);
-    protected:
-        std::vector<int> state;
 };
 
 class HillClimbing:public Solver  {
@@ -18,6 +16,10 @@ class HillClimbing:public Solver  {
         HillClimbing(void);
         HillClimbing(const HillClimbing &ref);
         std::vector<int> run(int queen_num);
+    private:
+        std::vector<int> state;
+        // --*- HERE_SOME_GREEDY_STUFF -*--
+        // HC()?
 };
 
 class GA:public Solver  {
@@ -25,5 +27,16 @@ class GA:public Solver  {
         GA(void);
         GA(const GA &ref);
         std::vector<int> run(int queen_num);
+    private:
+        // --*- Some member -*--
+        // Mating Pool? A vector<> ?
+        // Population Poll? A vector<vector< > > ?
+        //
+        // --*- Some method -*--
+        // CrossOver
+        // Mutation
+        // Selection
+        // Survival
+        // etc.
 };
 #endif
