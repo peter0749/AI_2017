@@ -30,11 +30,19 @@ class HillClimbing:public Solver  {
 
 class GA:public Solver  {
     public:
-        GA(void);
+        GA(size_t polulation_size, unsigned int tournament, \
+           double cross_over_rate=0.9, double mutation_rate=-1, \
+           unsigned int termination, unsigned runs
+          );
         GA(const GA &ref);
         virtual std::vector<int> run(int queen_num); // output final state
     private:
         // --*- Some member -*--
+        double mutation_r, cx_r; // rate
+        unsigned int tournament; // for selection
+        const size_t polulation_size;
+        const unsigned int termination;
+        const unsigned int runs;
         std::vector<int> matingPool; // selected index of parents
         std::vector<vector<int> > polulationPool;
         // --*- Some method -*--
