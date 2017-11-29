@@ -32,7 +32,7 @@ class GA:public Solver  {
     public:
         GA(size_t polulation_size, unsigned int tournament, \
            double cross_over_rate=0.9, double mutation_rate=-1, \
-           unsigned int termination, unsigned runs
+           unsigned int termination, unsigned int runs
           );
         GA(const GA &ref);
         virtual std::vector<int> run(int queen_num); // output final state
