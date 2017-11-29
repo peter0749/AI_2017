@@ -4,7 +4,6 @@
 #include <cmath>
 #include <climits>
 #include <algorithm>
-using std::abs;
 
 /* Interface of solvers */
 
@@ -30,9 +29,9 @@ class HillClimbing:public Solver  {
 
 class GA:public Solver  {
     public:
-        GA(size_t polulation_size, unsigned int tournament, \
+        GA(size_t polulation_size=300, unsigned int tournament=5, \
            double cross_over_rate=0.9, double mutation_rate=-1, \
-           unsigned int termination, unsigned int runs
+           unsigned int termination=100, unsigned int runs=30
           );
         GA(const GA &ref);
         virtual std::vector<int> run(int queen_num); // output final state
@@ -44,7 +43,7 @@ class GA:public Solver  {
         const unsigned int termination;
         const unsigned int runs;
         std::vector<int> matingPool; // selected index of parents
-        std::vector<vector<int> > polulationPool;
+        std::vector<std::vector<int> > polulationPool;
         // --*- Some method -*--
         std::vector<int> CrossOver(const std::vector<int> &p, 
                                    const std::vector<int> &q);
