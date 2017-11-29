@@ -75,9 +75,12 @@ std::pair<std::vector<int>, std::vector<int> > GA::CrossOver(const std::vector<i
     if ((double)rand()/(double)RAND_MAX > this->cx_r) return make_pair(p,q);
     std::vector<int> child_1(p.size(), 0), child_2(p.size(), 0);
     int l = rand()%p.size();
-    int r = rand()%p.size(); // 2-point CX
+    int r = rand()%p.size(); // 1~2-point CX
     if (l>r) std::swap(l,r);
-    else if (l==r) ++r; // [l, r)
+    else if (l==r) {
+        if(r==p.size()-1) --l;
+        else ++r;
+    }
     std::map<int,int> mapping_pq, mapping_qp; // PMX
     for (int i=l; i<r; ++i) {
         mapping_pq[p[i]] = q[i];
