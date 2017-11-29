@@ -12,7 +12,7 @@ class Solver {
         Solver(void);
         Solver(const Solver &ref); // You need to complete copy assianment
         virtual std::vector<int> run(int queen_num)=0;
-        int attack_number(const std::vector<int> state);
+        static int attack_number(const std::vector<int> state);
     protected:
         void random_init(int n, std::vector<int> &state);
 };
@@ -29,7 +29,7 @@ class HillClimbing:public Solver  {
 
 class GA:public Solver  {
     public:
-        GA(size_t polulation_size=300, unsigned int tournament=5, \
+        GA(size_t state_size, size_t polulation_size=300, unsigned int tournament=5, \
            double cross_over_rate=0.9, double mutation_rate=-1, \
            unsigned int termination=100, unsigned int runs=30
           );
@@ -37,6 +37,7 @@ class GA:public Solver  {
         virtual std::vector<int> run(int queen_num); // output final state
     private:
         // --*- Some member -*--
+        const size_t state_size;
         double mutation_r, cx_r; // rate
         unsigned int tournament; // for selection
         const size_t polulation_size;
@@ -45,7 +46,7 @@ class GA:public Solver  {
         std::vector<int> matingPool; // selected index of parents
         std::vector<std::vector<int> > polulationPool;
         // --*- Some method -*--
-        std::vector<int> CrossOver(const std::vector<int> &p, 
+        std::pair<std::vector<int>, std::vector<int> > CrossOver(const std::vector<int> &p, 
                                    const std::vector<int> &q);
         void Mutation(std::vector<int> &gene);
         // Selection: return index of selected gene
