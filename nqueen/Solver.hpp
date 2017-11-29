@@ -32,17 +32,18 @@ class GA:public Solver  {
     public:
         GA(void);
         GA(const GA &ref);
-        virtual std::vector<int> run(int queen_num);
+        virtual std::vector<int> run(int queen_num); // output final state
     private:
         // --*- Some member -*--
-        // Mating Pool? A vector<> ?
-        // Population Poll? A vector<vector< > > ?
-        //
+        std::vector<int> matingPool; // selected index of parents
+        std::vector<vector<int> > polulationPool;
         // --*- Some method -*--
-        // CrossOver
-        // Mutation
-        // Selection
-        // Survival
-        // etc.
+        std::vector<int> CrossOver(const std::vector<int> &p, 
+                                   const std::vector<int> &q);
+        void Mutation(std::vector<int> &gene);
+        // Selection: return index of selected gene
+        std::vector<int> Selection(const int sel_n); 
+        // End Selection.
+        void Survival(const int survive_n); // next gen.
 };
 #endif
