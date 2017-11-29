@@ -72,6 +72,7 @@ GA::GA(const GA &ref): state_size(ref.state_size), polulation_size(ref.polulatio
 
 std::pair<std::vector<int>, std::vector<int> > GA::CrossOver(const std::vector<int> &p,
                                const std::vector<int> &q) {
+    if ((double)rand()/(double)RAND_MAX > this->cx_r) return make_pair(p,q);
     std::vector<int> child_1(p.size(), 0), child_2(p.size(), 0);
     int l = rand()%p.size();
     int r = rand()%p.size(); // 2-point CX
@@ -130,16 +131,39 @@ bool cmp(const std::vector<int> &a, const std::vector<int> &b) {
 
 void GA::Survival(const int survive_n) {
     sort(this->polulationPool.begin(), this->polulationPool.end(), cmp);
+    this->polulationPool.resize(survive_n); // truncated
 }
 
 std::vector<int> GA::run(int queen_num) {
     std::vector<int> best_run;
     this->random_init(this->state_size, best_run);
+    int best_score = this->attack_number(best_run);
     for (int R=0; R<this->runs; ++R) {
         // some stuff
+        for (int i=0; i<this->polulation_size; ++i) {
+            std::vector<int> individual;
+            this->random_init(this->state_size, individual);
+            this->polulationPool.push_back(individual);
+        }
         for (int T=0; T<this->termination; ++T) {
+            std::vector<int> selected = this->Selection(this->polulation_size); // selection
+            for (int i=0; i+1<selected.size(); i+=2) {
+                std::pair<std::vector<int>, std::vector<int> > childs = \
+                    this->CrossOver(this->polulationPool[selected[i]], this->polulationPool[selected[i+1]]);
+                this->Mutation(childs.first);
+                this->Mutation(childs.second);
+                this->polulationPool.push_back(childs.first);
+                this->polulationPool.push_back(childs.second); // mu+lambda
+            }
+            this->Survival(this->polulation_size);
+            int top_score = this->attack_number(this->polulationPool[0]);
+            if (top_score<best_score) {
+                best_score = top_score;
+                best_run = this->polulationPool[0];
+            }
             // some stuff
         }
+        this->polulationPool.clear();
     }
     return best_run;
 }
