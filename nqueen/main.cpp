@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
     int n_queen = atoi(argv[1]);
     Nqueen nq;
     HillClimbing HC;
-    GA ga(n_queen, 100, 5, 0.9, 0.9, 800, 1);
+    GA ga(n_queen, 100, 5, 0.95, 0.95, 800, 1);
     pair<int, vector<int> > result = nq.solve(&HC, n_queen);
     cout << "HC:\n" << endl;
     for (int i=0; i<n_queen; ++i) {
