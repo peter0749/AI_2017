@@ -10,31 +10,39 @@ using namespace std;
 
 int main(int argc, char **argv) {
     srand(time(NULL));
-    if (argc<2) return 1;
+    if (argc<3) {
+        cerr << "usage: ./" << argv[0] << "nqueen round" << endl;
+        return 1;
+    }
     int n_queen = atoi(argv[1]);
+    int round = atoi(argv[2]);
     Nqueen nq;
     HillClimbing HC;
     GA ga(n_queen, 100, 5, 0.95, 0.95, 800, 1);
-    pair<int, vector<int> > result = nq.solve(&HC, n_queen);
-    cout << "HC:\n" << endl;
-    for (int i=0; i<n_queen; ++i) {
-        int j=0;
-        for (; j<result.second[i]; ++j) cout << "0 ";
-        cout << "1 "; 
-        for (++j; j<n_queen; ++j) cout << "0 ";
-        cout << endl;
-    }
-    cout << "#attack: " << result.first << endl;
+    int ga_succ=0, hc_succ=0;
+    int ga_tatk=0, hc_tatk=0;
+    for (int i=0; i<round; ++i) {
+        pair<int, vector<int> > result = nq.solve(&HC, n_queen);
+        cout << "HC:" << endl;
+        for (const auto v: result.second) cout << v << ' ';
+        cout << "\n#attack: " << result.first << '\n' << endl;
+        hc_tatk += result.first;
+        hc_succ += (result.first==0);
 
-    cout << "GA:\n" << endl;
-    result = nq.solve(&ga, n_queen);
-    for (int i=0; i<n_queen; ++i) {
-        int j=0;
-        for (; j<result.second[i]; ++j) cout << "0 ";
-        cout << "1 "; 
-        for (++j; j<n_queen; ++j) cout << "0 ";
-        cout << endl;
+        cout << "GA:" << endl;
+        for (const auto v: result.second) cout << v << ' ';
+        result = nq.solve(&ga, n_queen);
+        cout << "\n#attack: " << result.first << '\n' << endl;
+        ga_tatk += result.first;
+        ga_succ += (result.first==0);
     }
-    cout << "#attack: " << result.first << endl;
+    cout << "HC:" << endl;
+    cout << "average #attack: " << (float)hc_tatk/round << endl;
+    cout << "success rate: " << (float)hc_succ/round << '\n' << endl;
+
+    cout << "GA:" << endl;
+    cout << "average #attack: " << (float)ga_tatk/round << endl;
+    cout << "success rate: " << (float)ga_succ/round << endl;
+
     return 0;
 }
