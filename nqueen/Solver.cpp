@@ -128,7 +128,7 @@ std::vector<int> GA::Selection(const int sel_n) {
     return selected_index;
 }
 
-bool cmp(const std::vector<int> &a, const std::vector<int> &b) {
+static bool cmp(const std::vector<int> &a, const std::vector<int> &b) {
     return Solver::attack_number(a) < Solver::attack_number(b);
 }
 
