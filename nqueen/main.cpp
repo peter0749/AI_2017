@@ -36,12 +36,12 @@ int main(int argc, char **argv) {
         hc_tatk += result.first;
         hc_succ += (result.first==0);
 
-        cout << "GA:" << endl;
-        for (const auto v: result.second) cout << v << ' ';
         gettimeofday(&sv, &sz);
         result = nq.solve(&ga, n_queen);
         gettimeofday(&ev, &ez);
         accum_time_ga += 1000000*(ev.tv_sec-sv.tv_sec)+(ev.tv_usec-sv.tv_usec);
+        cout << "GA:" << endl;
+        for (const auto v: result.second) cout << v << ' ';
         cout << "\n#attack: " << result.first << '\n' << endl;
         ga_tatk += result.first;
         ga_succ += (result.first==0);
