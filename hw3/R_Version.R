@@ -51,8 +51,8 @@ rm(list=c('neg_folds', 'pos_folds', 'neg_data', 'pos_data', 'temp'))
 gc()
 
 f1_score <- function(preds,labels) {
-  recall = sum(preds==1 & labels==1) / sum(labels)
-  precise = sum(preds==1 & labels==1) / sum(preds)
+  recall = sum(preds==1 & labels==1) / sum(labels==1)
+  precise = sum(preds==1 & labels==1) / sum(preds==1)
   f1 <- 2 * recall * precise / (recall + precise)
   return(f1)
 }
@@ -74,7 +74,7 @@ xgbTreeParams <- list(
   colsample_bytree = 0.9,        # 生成樹時進行的列取樣
   silent = 0,                    # 設定成 0 輸出 log 到 stderr
   eta = 0.01,                    # 學習率
-  scale_pos_weight = 16,         # 給正樣本的權重
+  #scale_pos_weight = 16,         # 給正樣本的權重
   nthread = 4                    # cpu 執行緒數
 )
 
@@ -99,16 +99,19 @@ if(TUNE_SVM) {
     out <- foreach(j = 1:nfolds, .combine = rbind, .inorder = FALSE) %dopar% {
       deve <- data[folds != j, ]
       test <- data[folds == j, ]
-      mdl <- e1071::svm(sparse.model.matrix(click ~ .-1, data = deve), as.factor(deve$click), type = "C-classification",
-                        kernel = "radial", cost = c, gamma = g,
-                        class.weights = weights
+      ub <- ubBalance(deve[,-5], as.factor(unlist(deve[,5])), type='ubUnder', positive=1)
+      sparse_X = sparse.model.matrix(~ ., data = ub$X)
+      sparse_X.svd = svd(sparse_X)
+      mdl <- e1071::svm(sparse.model.matrix(~ ., data = ub$X), as.factor(ub$Y), type = "C-classification",
+                        kernel = "radial", cost = c, gamma = g #,
+                        #class.weights = weights
       )
       pred <- predict(mdl, sparse.model.matrix(click ~ .-1, data = test))
       data.frame(y_true = test$click, y_pred = pred)
     }
     printf('Tuning progress: %d / %d\n', i, nrow(parms))
     ### CALCULATE SVM PERFORMANCE ###
-    f1_score_val <- f1_score(as.factor(out$y), as.factor(out$prob))
+    f1_score_val <- f1_score(out$y_pred, out$y_true)
     data.frame(parms[i, ], f1 = f1_score_val)
   }
   gc()
@@ -119,9 +122,9 @@ if (TRAIN_XGBOOST){
   for (i in 1:nfolds) {
     validIdx = which(folds==i, arr.ind=TRUE)
     gc()
-    #ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
-    #print(count((as.numeric(ub$Y)-1)))
-    ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
+    ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
+    # print(count((as.numeric(ub$Y)-1)))
+    # ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
     bst <- xgboost(params=xgbTreeParams, data=sparse.model.matrix(~ ., data = ub$X), label=as.integer(ub$Y)-1, nrounds=40,  verbose = TRUE)
     # bst <- rpart(click ~ . , data = cbind(ub$X, click=ub$Y), method='class')
     # bst <- svm(sparse.model.matrix(~ ., data = ub$X), ub$Y, type='one-classification')
