@@ -14,7 +14,7 @@ printf <- function(...) cat(sprintf(...)) # printf function
 data <- fread('~/TraData.csv', sep=',', stringsAsFactors = TRUE)
 
 USE_FACTOR = TRUE
-TUNE_SVM = TRUE
+TUNE_SVM = FALSE
 TRAIN_XGBOOST = TRUE
 
 if (USE_FACTOR) {
@@ -34,7 +34,7 @@ neg_data <- data[data$click==0, ]
 rm(data)
 pos_data<-pos_data[sample(nrow(pos_data)),] ## shuffle
 neg_data<-neg_data[sample(nrow(neg_data)),] ## shuffle
-nfolds=3
+nfolds=10
 pos_folds <- cut(seq(1,nrow(pos_data)),breaks=nfolds,labels=FALSE)
 neg_folds <- cut(seq(1,nrow(neg_data)),breaks=nfolds,labels=FALSE)
 
@@ -51,9 +51,13 @@ rm(list=c('neg_folds', 'pos_folds', 'neg_data', 'pos_data', 'temp'))
 gc()
 
 f1_score <- function(preds,labels) {
+  #t = table(pred=preds, real=labels)
   recall = sum(preds==1 & labels==1) / sum(labels==1)
   precise = sum(preds==1 & labels==1) / sum(preds==1)
   f1 <- 2 * recall * precise / (recall + precise)
+  acc <- sum(diag(t)) / length(labels)
+  #print(t)
+  #printf('acc: %.2f%%', 100.*acc)
   return(f1)
 }
 
@@ -67,20 +71,20 @@ f1_metric <- function(prob, dtrain) {
 xgbTreeParams <- list(
   objective='binary:logistic',
   eval_metric=f1_metric,
-  gamma = 0.2,                   # 用於控制是否後剪枝的引數,越大越保守，一般0.1、0.2這樣子。 0.2
-  max_depth = 5,                 # 構建樹的深度，越大越容易過擬合 5
-  lambda = 2.2,                  # 控制模型複雜度的權重值的L2正則化項引數，引數越大，模型越不容易過擬合。
+  #gamma = 0.2,                   # 用於控制是否後剪枝的引數,越大越保守，一般0.1、0.2這樣子。 0.2
+  max_depth = 7,                 # 構建樹的深度，越大越容易過擬合 5
+  #lambda = 2.2,                  # 控制模型複雜度的權重值的L2正則化項引數，引數越大，模型越不容易過擬合。
   subsample = 0.9,               # 隨機取樣訓練樣本
   colsample_bytree = 0.9,        # 生成樹時進行的列取樣
   silent = 0,                    # 設定成 0 輸出 log 到 stderr
   eta = 0.01,                    # 學習率
-  #scale_pos_weight = 16,         # 給正樣本的權重
+  scale_pos_weight = 10.2,         # 給正樣本的權重
   nthread = 4                    # cpu 執行緒數
 )
 
 weights <- table(data$click)
 weights[1] = 1
-weights[2] = 16
+weights[2] = 10.2
 
 if(TUNE_SVM) {
   gc()
@@ -122,10 +126,10 @@ if (TRAIN_XGBOOST){
   for (i in 1:nfolds) {
     validIdx = which(folds==i, arr.ind=TRUE)
     gc()
-    ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
+    # ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
     # print(count((as.numeric(ub$Y)-1)))
-    # ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
-    bst <- xgboost(params=xgbTreeParams, data=sparse.model.matrix(~ ., data = ub$X), label=as.integer(ub$Y)-1, nrounds=40,  verbose = TRUE)
+    ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
+    bst <- xgboost(params=xgbTreeParams, data=sparse.model.matrix(~ ., data = ub$X), label=as.integer(ub$Y)-1, nrounds=20,  verbose = TRUE)
     # bst <- rpart(click ~ . , data = cbind(ub$X, click=ub$Y), method='class')
     # bst <- svm(sparse.model.matrix(~ ., data = ub$X), ub$Y, type='one-classification')
     # bst <- svm(click ~ . , data = cbind(ub$X, click=ub$Y), type='one-classification')
