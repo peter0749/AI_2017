@@ -130,9 +130,9 @@ if (TRAIN_XGBOOST){
   for (i in 1:nfolds) {
     validIdx = which(folds==i, arr.ind=TRUE)
     gc()
-    # ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
+    ub = ubBalance(data[-validIdx,-5], as.factor(unlist(data[-validIdx,5])), type='ubUnder', positive=1)
     # print(count((as.numeric(ub$Y)-1)))
-    ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
+    # ub = list(X=data[-validIdx,-5], Y=as.factor(unlist(data[-validIdx,5])))
     bst <- xgboost(params=xgbTreeParams, data=sparse.model.matrix(~ ., data = ub$X), label=as.integer(ub$Y)-1, nrounds=20,  verbose = TRUE)
     # bst <- rpart(click ~ . , data = cbind(ub$X, click=ub$Y), method='class')
     # bst <- svm(sparse.model.matrix(~ ., data = ub$X), ub$Y, type='one-classification')
