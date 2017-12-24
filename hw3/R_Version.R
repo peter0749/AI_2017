@@ -55,10 +55,14 @@ f1_score <- function(preds,labels) {
   recall = sum(preds==1 & labels==1) / sum(labels==1)
   precise = sum(preds==1 & labels==1) / sum(preds==1)
   f1 <- 2 * recall * precise / (recall + precise)
-  acc <- sum(diag(t)) / length(labels)
-  #print(t)
-  #printf('acc: %.2f%%', 100.*acc)
+  # acc <- sum(diag(t)) / length(labels)
+  # print(t)
+  # printf('acc: %.2f%%', 100.*acc)
   return(f1)
+}
+
+confusion <- function(p,t) {
+  table(pred=p, real=t)
 }
 
 f1_metric <- function(prob, dtrain) {
@@ -140,6 +144,7 @@ if (TRAIN_XGBOOST){
     # pred <- predict(bst, data[validIdx,-5])
     f1 <- f1_score(as.integer(pred>0.5), as.numeric(unlist(data[validIdx,5]))-1)
     printf('f1(valid): %.4f\n', f1)
+    print(confusion(as.integer(pred>0.5), as.numeric(unlist(data[validIdx,5]))-1))
     f1_records = append(f1_records, f1)
   }
   print(summary(f1_records))
