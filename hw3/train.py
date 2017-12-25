@@ -262,6 +262,7 @@ else:
         fp.write('click\n') # field name
         for v in predicted:
             fp.write('%d\n'%int(v))
+    print('Answer is in: results_label.txt')
 
 
 # 補充從 R script 得到的這份 training data 的 ANOVA 結果（從九十萬筆資料隨機抽樣5000筆資料）：
