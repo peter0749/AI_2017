@@ -231,7 +231,7 @@ if EXPORT_MODELS:
 # In[16]:
 
 
-def voter(models, data, tol=0.12): # set tolerance to ignore weak classifier
+def voter(models, data, tol=0.05): # set tolerance to ignore weak classifier
     final_p = np.zeros(len(data))
     for i, entry in enumerate(models):
         model, score = entry[-2], entry[-1]
@@ -249,7 +249,7 @@ def voter(models, data, tol=0.12): # set tolerance to ignore weak classifier
 from sklearn.model_selection import train_test_split
 if not TESTING:
     X_test_svd = svd.transform(X_test)
-    predicted = voter(models, X_test_svd, tol=0.12)
+    predicted = voter(models, X_test_svd, tol=0.05)
     confusion_metrix = skl.metrics.confusion_matrix(Y_test, predicted)
     inclass_precision = skl.metrics.classification_report(Y_test, predicted)
     score = f1_score(Y_test, predicted, average='binary')
