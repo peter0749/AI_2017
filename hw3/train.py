@@ -189,7 +189,6 @@ models = []
 
 if not TESTING:
     kfold = StratifiedKFold(n_splits=10, shuffle=True)
-    models = []
     cvscores = []
     for model_name, model in classifiers.items():
         print('Training %s...'%model_name)
