@@ -134,8 +134,8 @@ classifiers = {
                 # 'SVC':SVC(kernel='rbf', class_weight=class_weight, max_iter=300),
                 #'LinearSVC':LinearSVC(class_weight=class_weight, max_iter=300),
                 #'XGBoost': xgb.XGBClassifier(**param),
-                'DecisionTree': tree.DecisionTreeClassifier(max_depth=5, class_weight=class_weight),
-                'RandomForest': RandomForestClassifier(n_estimators=24, n_jobs=24, max_depth=5, class_weight=class_weight),
+                'RandomForest-1-16': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=8, class_weight={0:1,1:16}, min_samples_leaf=7),
+                'AdaBoost-1-16': AdaBoostClassifier(tree.DecisionTreeClassifier(min_samples_split=6, max_depth=8, class_weight={0:1,1:16}, min_samples_leaf=7), n_estimators=160),
                 # 'KNN_dist': KNN(n_neighbors=3, weights='distance',),
                 # 'KNN_uni': KNN(n_neighbors=3, weights='uniform',),
                 # SVM 複雜度太高了，算不完 O(n^3~n^4), 使用簡單的 LinearSVM(O(N))]
