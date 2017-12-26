@@ -101,7 +101,7 @@ else:
     if EXPORT_MODELS:
         with open(model_dir+"/feature_extractors/dv.pkl", "wb") as f: # export pca transformer
             pickle.dump(dv, f, pickle.HIGHEST_PROTOCOL)
-data = dv.transform(data.T.to_dict().values(), sparse=True)
+data = dv.transform(data.T.to_dict().values())
 
 
 # In[4]:
