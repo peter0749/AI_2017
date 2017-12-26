@@ -123,11 +123,16 @@ if not TESTING:
 # In[7]:
 
 ## DT on sklearn is based on CART algorithm. Let's try ID3&CART algorithm both. And SVM.
+best_param = {
+    'oob_score': True,
+    'min_samples_leaf': 1,
+    'n_estimators': 160,
+    'min_samples_split': 5,
+    'max_depth': 12, 
+    'class_weight': {0: 1, 1: 12}
+}
 classifiers = {
-                'RandomForest-1-14': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:14}, min_samples_leaf=7),
-                'RandomForest-1-15': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:15}, min_samples_leaf=7),
-                'RandomForest-1-16': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:16}, min_samples_leaf=7),
-                'LinearSVC': LinearSVC(dual=False, class_weight={0:1,1:16})
+                'RandomForest-best': RandomForestClassifier(**best_param),
               }
 
 
