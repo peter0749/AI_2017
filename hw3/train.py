@@ -70,12 +70,10 @@ if EXPORT_MODELS:
         os.makedirs(model_dir+'/pca')
     if not os.path.isdir(model_dir+'/models'):
         os.makedirs(model_dir+'/models')
-
 if args.toy:
     data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False).sample(10000) # toy
 else:
     data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False)
-
 if not TESTING:
     if IMPORT_MODELS and os.path.exists(model_dir+"/feature_extractors/le.pkl"):
         label_le = load_model(model_dir+"/feature_extractors/le.pkl")
@@ -86,32 +84,30 @@ if not TESTING:
                 pickle.dump(label_le, f, pickle.HIGHEST_PROTOCOL)
     label = label_le.transform(data.click)
     del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
+# 特徵選擇、降維 改交給 SVD 分解完成
 
 selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
 data = data[selected_col]
 
-def LabelEncoders_fit(data):
-    le = dict()
-    for key, value in data.iteritems():
-        le[key] = LE()
-        le[key].fit(value)
-    return le
-
-def LabelEncoders_transform(le, data):
-    result = []
-    for key, value in data.iteritems():
-        result.append(le[key].transform(value))
-    result = np.transpose(np.asarray(result), (1,0))
-    return np.asarray(result)
-
 if IMPORT_MODELS and os.path.exists(model_dir+"/feature_extractors/dv.pkl"):
     dv = load_model(model_dir+"/feature_extractors/dv.pkl")
 else:
-    dv = LabelEncoders_fit(data)
+    dv = DictVectorizer(sparse=False).fit(data.T.to_dict().values()) # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
     if EXPORT_MODELS:
         with open(model_dir+"/feature_extractors/dv.pkl", "wb") as f: # export pca transformer
             pickle.dump(dv, f, pickle.HIGHEST_PROTOCOL)
-data = LabelEncoders_transform(dv, data)
+data = dv.transform(data.T.to_dict().values())
+
+
+# In[4]:
+
+
+#print data[:3] ## 印出三筆資料觀察
+#print label[:3]
+
+
+# In[5]:
+
 
 from sklearn.model_selection import train_test_split
 if not TESTING:
@@ -128,8 +124,9 @@ if not TESTING:
 
 ## DT on sklearn is based on CART algorithm. Let's try ID3&CART algorithm both. And SVM.
 classifiers = {
+                'RandomForest-1-14': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:14}, min_samples_leaf=7),
+                'RandomForest-1-15': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:15}, min_samples_leaf=7),
                 'RandomForest-1-16': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:16}, min_samples_leaf=7),
-                # 'LinearSVC': LinearSVC(dual=False, class_weight={0:1,1:16})
               }
 
 
@@ -142,7 +139,34 @@ from sklearn.metrics import f1_score
 
 # In[9]:
 
+
+if IMPORT_MODELS and os.path.exists(model_dir+"/pca/pca.pkl"):
+    svd = load_model(model_dir+"/pca/pca.pkl")
+else:
+    # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
+    svd = PCA(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
+    if EXPORT_MODELS:
+        with open(model_dir+"/pca/pca.pkl", "wb") as f: # export pca transformer
+            pickle.dump(svd, f, pickle.HIGHEST_PROTOCOL)
+
+
+# In[10]:
+
+
+svd_data = svd.transform(data)
+print svd_data.shape
+print np.cumsum(svd.explained_variance_ratio_)
+print 'info: %.2f'%np.sum(svd.explained_variance_ratio_)
+print 'nans: %d'%np.sum(np.isnan(svd_data))
+
+
+# In[11]:
+
+
+data = svd_data
+del svd_data
 models = []
+
 
 # 10-fold Cross-validation
 
@@ -210,7 +234,8 @@ def voter(models, data, tol=0.05): # set tolerance to ignore weak classifier
 
 from sklearn.model_selection import train_test_split
 if not TESTING:
-    predicted = voter(models, X_test, tol=0.05)
+    X_test_svd = svd.transform(X_test)
+    predicted = voter(models, X_test_svd, tol=0.05)
     confusion_metrix = skl.metrics.confusion_matrix(Y_test, predicted)
     inclass_precision = skl.metrics.classification_report(Y_test, predicted)
     score = f1_score(Y_test, predicted, average='binary')
