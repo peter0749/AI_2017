@@ -70,10 +70,12 @@ if EXPORT_MODELS:
         os.makedirs(model_dir+'/pca')
     if not os.path.isdir(model_dir+'/models'):
         os.makedirs(model_dir+'/models')
+
 if args.toy:
-    data = pd.read_csv(train_path, sep=',').sample(10000) # toy
+    data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False).sample(10000) # toy
 else:
-    data = pd.read_csv(train_path, sep=',')
+    data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False)
+
 if not TESTING:
     if IMPORT_MODELS and os.path.exists(model_dir+"/feature_extractors/le.pkl"):
         label_le = load_model(model_dir+"/feature_extractors/le.pkl")
@@ -84,16 +86,9 @@ if not TESTING:
                 pickle.dump(label_le, f, pickle.HIGHEST_PROTOCOL)
     label = label_le.transform(data.click)
     del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
-del data['ip'] # ip 的 dimension 有 70多萬維，太高了我們不要它
-del data['adx']
-del data['spaceCat']
-# del data['adType']
-# del data['os']
-# del data['deviceType']
-del data['publisherId']
-del data['dclkVerticals']
-# del data['campaignId']
-# del data['advertiserId']
+
+selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
+data = data[selected_col]
 
 def LabelEncoders_fit(data):
     le = dict()
@@ -117,16 +112,6 @@ else:
         with open(model_dir+"/feature_extractors/dv.pkl", "wb") as f: # export pca transformer
             pickle.dump(dv, f, pickle.HIGHEST_PROTOCOL)
 data = LabelEncoders_transform(dv, data)
-
-# In[4]:
-
-
-#print data[:3] ## 印出三筆資料觀察
-#print label[:3]
-
-
-# In[5]:
-
 
 from sklearn.model_selection import train_test_split
 if not TESTING:
