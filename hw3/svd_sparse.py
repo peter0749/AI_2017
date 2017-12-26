@@ -97,7 +97,7 @@ del data['dclkVerticals']
 if IMPORT_MODELS and os.path.exists(model_dir+"/feature_extractors/dv.pkl"):
     dv = load_model(model_dir+"/feature_extractors/dv.pkl")
 else:
-    dv = DictVectorizer(sparse=False).fit(data.T.to_dict().values()) # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
+    dv = DictVectorizer(sparse=True).fit(data.T.to_dict().values()) # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
     if EXPORT_MODELS:
         with open(model_dir+"/feature_extractors/dv.pkl", "wb") as f: # export pca transformer
             pickle.dump(dv, f, pickle.HIGHEST_PROTOCOL)
