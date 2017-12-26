@@ -16,6 +16,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, Bagging
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.dummy import DummyClassifier
 from sklearn.decomposition import PCA
+from sklearn.model_selection import GridSearchCV
 import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler, OneSidedSelection
 from imblearn.over_sampling import SMOTE
@@ -66,5 +67,5 @@ estimator = LinearSVC() ## 這裡放你想要評估的模型
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
 clf.fit(data, label)
 print clf.best_score_ ## 最好有多少？
-print best_params_ ## 最好的參數
+print clf.best_params_ ## 最好的參數
 
