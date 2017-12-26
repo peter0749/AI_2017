@@ -15,7 +15,7 @@ from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, BaggingClassifier
 from sklearn.neighbors import KNeighborsClassifier as KNN
 from sklearn.dummy import DummyClassifier
-from sklearn.decomposition import PCA, TruncatedSVD
+from sklearn.decomposition import PCA
 import pandas as pd
 from imblearn.under_sampling import RandomUnderSampler, OneSidedSelection
 from imblearn.over_sampling import SMOTE
@@ -85,11 +85,12 @@ if not TESTING:
     label = label_le.transform(data.click)
     del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
 # 特徵選擇、降維 改交給 SVD 分解完成
-# del data['ip'] # ip 的 dimension 有 70多萬維，太高了我們不要它
+del data['ip'] # ip 的 dimension 有 70多萬維，太高了我們不要它
+del data['adx']
 del data['spaceCat']
-del data['adType']
+# del data['adType']
 # del data['os']
-del data['deviceType']
+# del data['deviceType']
 del data['publisherId']
 del data['dclkVerticals']
 # del data['campaignId']
@@ -127,20 +128,10 @@ if not TESTING:
 
 # In[7]:
 
-
-class_weight={0:1,1:16}
 ## DT on sklearn is based on CART algorithm. Let's try ID3&CART algorithm both. And SVM.
 classifiers = {
-                # 'SVC':SVC(kernel='rbf', class_weight=class_weight, max_iter=300),
-                #'LinearSVC':LinearSVC(class_weight=class_weight, max_iter=300),
-                #'XGBoost': xgb.XGBClassifier(**param),
-                'RandomForest-1-16': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=8, class_weight={0:1,1:16}, min_samples_leaf=7),
-                'AdaBoost-1-16': AdaBoostClassifier(tree.DecisionTreeClassifier(min_samples_split=6, max_depth=8, class_weight={0:1,1:16}, min_samples_leaf=7), n_estimators=160),
-                # 'KNN_dist': KNN(n_neighbors=3, weights='distance',),
-                # 'KNN_uni': KNN(n_neighbors=3, weights='uniform',),
-                # SVM 複雜度太高了，算不完 O(n^3~n^4), 使用簡單的 LinearSVM(O(N))]
-                # 'Random':DummyClassifier('uniform'), ## 下面這兩個是 baseline ，不應該比亂猜/都猜0還差
-                # 'Guess0':DummyClassifier('most_frequent')
+                'RandomForest-1-16': RandomForestClassifier(oob_score=True, max_features=0.2, min_samples_split=6, n_estimators=160, n_jobs=-1, max_depth=5, class_weight={0:1,1:16}, min_samples_leaf=7),
+                'LinearSVC': LinearSVC(dual=False, class_weight={0:1,1:16})
               }
 
 
@@ -158,7 +149,7 @@ if IMPORT_MODELS and os.path.exists(model_dir+"/pca/pca.pkl"):
     svd = load_model(model_dir+"/pca/pca.pkl")
 else:
     # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
-    svd = TruncatedSVD(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
+    svd = PCA(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
     if EXPORT_MODELS:
         with open(model_dir+"/pca/pca.pkl", "wb") as f: # export pca transformer
             pickle.dump(svd, f, pickle.HIGHEST_PROTOCOL)
