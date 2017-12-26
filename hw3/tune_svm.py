@@ -62,7 +62,12 @@ print 'nans: %d'%np.sum(np.isnan(svd_data))
 data = svd_data
 del svd_data
 
-parameters = {'C':[0.01, 0.1, 1, 10, 100]} ## 想要評估的模型的參數
+parameters = {
+    'C':[0.01, 0.1, 1, 10, 100],
+    'class_weight':[{0:1,1:w} for w in range(6,18)],
+    'dual':[False],
+    'max_iter': [300],
+    } ## 想要評估的模型的參數
 estimator = LinearSVC() ## 這裡放你想要評估的模型
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
 clf.fit(data, label)
