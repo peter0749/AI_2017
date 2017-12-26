@@ -84,16 +84,8 @@ if not TESTING:
                 pickle.dump(label_le, f, pickle.HIGHEST_PROTOCOL)
     label = label_le.transform(data.click)
     del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
-del data['ip'] # ip 的 dimension 有 70多萬維，太高了我們不要它
-del data['adx']
-del data['spaceCat']
-# del data['adType']
-# del data['os']
-# del data['deviceType']
-del data['publisherId']
-del data['dclkVerticals']
-# del data['campaignId']
-# del data['advertiserId']
+selected_col = ['adx', 'spaceType', 'spaceId', 'ip', 'campaignId']
+data = data[selected_col]
 
 def LabelEncoders_fit(data):
     le = dict()
