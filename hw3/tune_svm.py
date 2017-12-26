@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser(description='Train/Test')
 parser.add_argument('csv', metavar='CSV', type=str,
                     help='Path to the csv file')
 parser.add_argument('--toy', action='store_true', default=False,
-                    help='If set, randomly sample 10000 rows of data.')
+                    help='If set, randomly sample 8000 rows of data.')
 
 args = parser.parse_args()
 
@@ -33,21 +33,13 @@ from sklearn.preprocessing import OneHotEncoder as OHE
 from sklearn.preprocessing import LabelEncoder as LE
 from sklearn.feature_extraction import DictVectorizer
 train_path = args.csv
-if EXPORT_MODELS:
-    if not os.path.isdir(model_dir+'/feature_extractors'):
-        os.makedirs(model_dir+'/feature_extractors')
-    if not os.path.isdir(model_dir+'/pca'):
-        os.makedirs(model_dir+'/pca')
-    if not os.path.isdir(model_dir+'/models'):
-        os.makedirs(model_dir+'/models')
 if args.toy:
-    data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False).sample(10000) # toy
+    data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False).sample(8000) # toy
 else:
     data = pd.read_csv(train_path, sep=',', na_values=None, na_filter=False)
-if not TESTING:
-    label_le = LE().fit(data.click)
-    label = label_le.transform(data.click)
-    del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
+label_le = LE().fit(data.click)
+label = label_le.transform(data.click)
+del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
 # 特徵選擇、降維 改交給 SVD 分解完成
 
 selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
@@ -72,12 +64,11 @@ print 'nans: %d'%np.sum(np.isnan(svd_data))
 
 data = svd_data
 del svd_data
-models = []
 
-parameters = {'C':[0.01, 0.1, 1, 10, 100]}
-svc = LinearSVC()
-clf = GridSearchCV(svc, parameters)
+parameters = {'C':[0.01, 0.1, 1, 10, 100]} ## 想要評估的模型的參數
+estimator = LinearSVC() ## 這裡放你想要評估的模型
+clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
 clf.fit(data, label)
-print clf.best_score_
-print best_params_
+print clf.best_score_ ## 最好有多少？
+print best_params_ ## 最好的參數
 
