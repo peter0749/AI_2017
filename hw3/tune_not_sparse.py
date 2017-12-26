@@ -67,8 +67,12 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 
 parameters = {
-    'max_depth':[v for v in range(1,11)],
-    ## 你的參數
+    'max_depth':[v for v in range(3,15)],
+    'min_samples_split': [s for s in range(2,8)],
+    'min_samples_leaf': [l for l in range(1,6)],
+    'class_weight':[{0:1,1:w} for w in range(6,18)],
+    'n_estimators':[20],
+    'oob_score':[True],
     } ## 想要評估的模型的參數
 estimator = RandomForestClassifier() ## 這裡放你想要評估的模型
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
