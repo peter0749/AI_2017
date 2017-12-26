@@ -45,24 +45,31 @@ del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就�
 selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
 data = data[selected_col]
 
-dv = DictVectorizer(sparse=False).fit(data.T.to_dict().values()) # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
-data = dv.transform(data.T.to_dict().values())
+def LabelEncoders_fit(data):
+    le = dict()
+    for key, value in data.iteritems():
+        le[key] = LE()
+        le[key].fit(value)
+    return le
+
+def LabelEncoders_transform(le, data):
+    result = []
+    for key, value in data.iteritems():
+        result.append(le[key].transform(value))
+    result = np.transpose(np.asarray(result), (1,0))
+    return np.asarray(result)
+
+dv = LabelEncoders_fit(data)
+data = LabelEncoders_transform(dv, data)
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 
-svd = PCA(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
-svd_data = svd.transform(data)
-print svd_data.shape
-print np.cumsum(svd.explained_variance_ratio_)
-print 'info: %.2f'%np.sum(svd.explained_variance_ratio_)
-print 'nans: %d'%np.sum(np.isnan(svd_data))
-
-data = svd_data
-del svd_data
-
-parameters = {'C':[0.01, 0.1, 1, 10, 100]} ## 想要評估的模型的參數
-estimator = LinearSVC() ## 這裡放你想要評估的模型
+parameters = {
+    'max_depth':[v for v in range(1,11)],
+    ## 你的參數
+    } ## 想要評估的模型的參數
+estimator = RandomForestClassifier() ## 這裡放你想要評估的模型
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
 clf.fit(data, label)
 print clf.best_score_ ## 最好有多少？
