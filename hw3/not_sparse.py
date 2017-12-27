@@ -86,7 +86,7 @@ if not TESTING:
                 pickle.dump(label_le, f, pickle.HIGHEST_PROTOCOL)
     label = label_le.transform(data.click)
     del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
-selected_col = ['adx','spaceType','spaceId','spaceCat','adType','ip','os','deviceType','publisherId','dclkVerticals','campaignId','advertiserId']
+selected_col = ['adx','spaceType','spaceId','spaceCat','adType','os','deviceType','publisherId','campaignId','advertiserId']
 data = data[selected_col]
 
 def LabelEncoders_fit(data):
@@ -132,7 +132,7 @@ best_param = {
     'min_samples_leaf': 1,
     'n_estimators': 300,
     'min_samples_split': 5,
-    'max_depth': 12, 
+    'max_depth': 12,
     'n_jobs': -1,
     'class_weight': {0: 1, 1: 12}
 }
