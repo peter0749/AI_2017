@@ -137,11 +137,12 @@ best_param1 = {
     'class_weight': {0: 1, 1: 12}
 }
 best_param2 = {
-    'oob_score': True, 
+    'oob_score': True,
     'min_samples_leaf': 1,
-    'n_estimators': 400, 
+    'n_estimators': 400,
     'min_samples_split': 5,
     'max_depth': 11,
+    'n_jobs': -1,
     'class_weight': {0: 1, 1: 13}
 }
 classifiers = {

@@ -127,7 +127,7 @@ if not TESTING:
 svc_best1 = {'C': 0.1, 'max_iter': 2000, 'dual': False, 'class_weight': {0: 1, 1: 8}}
 svc_best2 = {'C': 0.01, 'max_iter': 2000, 'dual': True, 'class_weight': {0: 1, 1: 11}}
 rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
-rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}}
+rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
 
 classifiers = {
                 'SVC-best1': LinearSVC(**svc_best1),
