@@ -227,7 +227,7 @@ def voter(models, data, tol=0.05): # set tolerance to ignore weak classifier
 
 from sklearn.model_selection import train_test_split
 if not TESTING:
-    predicted = voter(models, X_test, tol=0.05)
+    predicted = voter(models, X_test, tol=0.14)
     confusion_metrix = skl.metrics.confusion_matrix(Y_test, predicted)
     inclass_precision = skl.metrics.classification_report(Y_test, predicted)
     score = f1_score(Y_test, predicted, average='binary')
