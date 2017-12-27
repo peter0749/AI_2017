@@ -125,11 +125,13 @@ if not TESTING:
 ## DT on sklearn is based on CART algorithm. Let's try ID3&CART algorithm both. And SVM.
 
 svc_best = {'C': 0.1, 'max_iter': 2000, 'dual': False, 'class_weight': {0: 1, 1: 8}}
-rf_best = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}}
 
 classifiers = {
                 'SVC-best': LinearSVC(**svc_best),
-                'RF-best': RandomForestClassifier(**rf_best),
+                'RF-best1': RandomForestClassifier(**rf_best1),
+                'RF-best2': RandomForestClassifier(**rf_best2),
               }
 
 
