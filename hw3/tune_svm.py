@@ -63,10 +63,10 @@ data = svd_data
 del svd_data
 
 parameters = {
-    'C':[0.01, 0.1, 1, 10, 100],
-    'class_weight':[{0:1,1:w} for w in range(6,18)],
-    'dual':[False],
-    'max_iter': [300],
+    'C':[0.01, 0.1, 1],
+    'class_weight':[{0:1,1:w} for w in range(8,12)],
+    'dual':[False,True],
+    'max_iter': [200],
     } ## 想要評估的模型的參數
 estimator = LinearSVC() ## 這裡放你想要評估的模型
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation

@@ -43,38 +43,35 @@ label = label_le.transform(data.click)
 del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
 # 特徵選擇、降維 改交給 SVD 分解完成
 
-selected_col = ['adx','spaceType','spaceId','spaceCat','adType','os','deviceType','publisherId','campaignId','advertiserId']
+selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
 data = data[selected_col]
 
-def LabelEncoders_fit(data):
-    le = dict()
-    for key, value in data.iteritems():
-        le[key] = LE()
-        le[key].fit(value)
-    return le
-
-def LabelEncoders_transform(le, data):
-    result = []
-    for key, value in data.iteritems():
-        result.append(le[key].transform(value))
-    result = np.transpose(np.asarray(result), (1,0))
-    return np.asarray(result)
-
-dv = LabelEncoders_fit(data)
-data = LabelEncoders_transform(dv, data)
+dv = DictVectorizer(sparse=False).fit(data.T.to_dict().values()) # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
+data = dv.transform(data.T.to_dict().values())
 
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import f1_score
 
+svd = PCA(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
+svd_data = svd.transform(data)
+print svd_data.shape
+print np.cumsum(svd.explained_variance_ratio_)
+print 'info: %.2f'%np.sum(svd.explained_variance_ratio_)
+print 'nans: %d'%np.sum(np.isnan(svd_data))
+
+data = svd_data
+del svd_data
+
 parameters = {
-    'max_depth':[v for v in range(11,14)],
-    'min_samples_split': [s for s in range(4,7)],
-    'min_samples_leaf': [1],
-    'class_weight':[{0:1,1:w} for w in range(11,15)],
-    'n_estimators':[40],
+    'max_depth':[v for v in range(4,7)],
+    'min_samples_split': [s for s in range(3,7)],
+    'min_samples_leaf': [l for l in range(3,7)],
+    'class_weight':[{0:1,1:w} for w in range(7,11)],
+    'n_estimators':[48],
     'oob_score':[True,False],
     } ## 想要評估的模型的參數
 estimator = RandomForestClassifier() ## 這裡放你想要評估的模型
+
 clf = GridSearchCV(estimator, parameters, n_jobs=-1, scoring='f1', cv=3) ## 多線程執行， 3-fold cross validation
 clf.fit(data, label)
 print clf.best_score_ ## 最好有多少？
