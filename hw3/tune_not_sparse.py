@@ -43,7 +43,7 @@ label = label_le.transform(data.click)
 del data['click'] # 記得別讓答案變成一組 feature ，這樣 model 就直接看到答案了
 # 特徵選擇、降維 改交給 SVD 分解完成
 
-selected_col = ['spaceType','spaceId','adType','os','deviceType','campaignId','advertiserId']
+selected_col = ['adx','spaceType','spaceId','spaceCat','adType','os','deviceType','publisherId','campaignId','advertiserId']
 data = data[selected_col]
 
 def LabelEncoders_fit(data):
