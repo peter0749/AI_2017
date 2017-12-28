@@ -5,7 +5,6 @@
 
 
 # get_ipython().magic(u'matplotlib inline')
-import sys
 import os
 import numpy as np
 import sklearn as skl
@@ -99,9 +98,24 @@ else:
             pickle.dump(dv, f, pickle.HIGHEST_PROTOCOL)
 data = dv.transform(data.T.to_dict().values())
 
+
+# In[4]:
+
+
+#print data[:3] ## 印出三筆資料觀察
+#print label[:3]
+
+
+# In[5]:
+
+
 from sklearn.model_selection import train_test_split
 if not TESTING:
     data, X_test, label, Y_test = train_test_split(data, np.asarray(label).flatten(), test_size=0.1)
+    print data.shape
+    print X_test.shape
+    print label.shape
+    print Y_test.shape
 
 
 # 設定模型參數、建構模型
@@ -110,10 +124,10 @@ if not TESTING:
 
 ## DT on sklearn is based on CART algorithm. Let's try ID3&CART algorithm both. And SVM.
 
-svc_best1 = {'C': 0.1, 'max_iter': 2000, 'dual': False}
-svc_best2 = {'C': 0.01, 'max_iter': 2000, 'dual': True}
-rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'n_jobs': -1}
-rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'n_jobs': -1}
+svc_best1 = {'C': 0.1, 'max_iter': 2000, 'dual': False, 'class_weight': {0: 1, 1: 8}}
+svc_best2 = {'C': 0.01, 'max_iter': 2000, 'dual': True, 'class_weight': {0: 1, 1: 11}}
+rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
 
 classifiers = {
                 'SVC-best1': LinearSVC(**svc_best1),
@@ -147,7 +161,14 @@ else:
 
 
 svd_data = svd.transform(data)
-sys.stderr.write('info: %.2f\n'%np.sum(svd.explained_variance_ratio_))
+print svd_data.shape
+print np.cumsum(svd.explained_variance_ratio_)
+print 'info: %.2f'%np.sum(svd.explained_variance_ratio_)
+print 'nans: %d'%np.sum(np.isnan(svd_data))
+
+
+# In[11]:
+
 
 data = svd_data
 del svd_data
@@ -163,14 +184,10 @@ if not TESTING:
     kfold = StratifiedKFold(n_splits=10, shuffle=True)
     cvscores = []
     for model_name, model in classifiers.items():
-        sys.stderr.write('Training %s...\n'%model_name)
+        print('Training %s...'%model_name)
         tempscores = []
         for train, test in kfold.split(data, label):
             X, y = data[train], label[train]
-            pos = np.sum(y)
-            neg = len(y) - pos
-            rs = RandomUnderSampler(ratio={0:pos*20, 1:pos})
-            X, y = rs.fit_sample(X, y)
             model.fit(X,y)
             pred = model.predict(data[test])
             pred[pred<0.5] = 0
@@ -178,7 +195,7 @@ if not TESTING:
             score = f1_score(label[test], pred, average='binary')
             tempscores.append(score)
             models.append((str(model_name), model, score))
-        sys.stderr.write("f1.avg: %.4f%% (+/- %.4f%%)\n" % (np.mean(tempscores)*100., np.std(tempscores)*100.)) ## validation 的 f1-score 的平均值 +/- 兩倍標準差
+        print("f1.avg: %.4f%% (+/- %.4f%%)" % (np.mean(tempscores)*100., np.std(tempscores)*100.)) ## validation 的 f1-score 的平均值 +/- 兩倍標準差
         cvscores.extend(tempscores)
 
 
@@ -229,16 +246,16 @@ if not TESTING:
     confusion_metrix = skl.metrics.confusion_matrix(Y_test, predicted)
     inclass_precision = skl.metrics.classification_report(Y_test, predicted)
     score = f1_score(Y_test, predicted, average='binary')
-    sys.stderr.write(str(confusion_metrix)+'\n')
-    sys.stderr.write(str(inclass_precision)+'\n')
-    sys.stderr.write(str(score)+'\n')
+    print(confusion_metrix)
+    print(inclass_precision)
+    print(score)
 else:
     predicted = voter(models, data).flatten()
     with open('./results_label.txt', 'w') as fp:
         fp.write('click\n') # field name
         for v in predicted:
             fp.write('%d\n'%int(v))
-    sys.stderr.write('Answer is in: results_label.txt\n')
+    print('Answer is in: results_label.txt')
 
 
 # 補充從 R script 得到的這份 training data 的 ANOVA 結果（從九十萬筆資料隨機抽樣5000筆資料）：
