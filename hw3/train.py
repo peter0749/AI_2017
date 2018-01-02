@@ -126,14 +126,24 @@ if not TESTING:
 
 #svc_best1 = {'C': 0.1, 'max_iter': 2000, 'dual': False, 'class_weight': {0: 1, 1: 8}}
 #svc_best2 = {'C': 0.01, 'max_iter': 2000, 'dual': True, 'class_weight': {0: 1, 1: 11}}
-rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
-rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+#rf_best1 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 300, 'min_samples_split': 3, 'max_depth': 5, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+#rf_best2 = {'oob_score': True, 'min_samples_leaf': 3, 'n_estimators': 400, 'min_samples_split': 5, 'max_depth': 6, 'class_weight': {0: 1, 1: 9}, 'n_jobs': -1}
+rf_best = {
+    'oob_score': True,
+    'min_samples_leaf': 3,
+    'n_estimators': 600,
+    'min_samples_split': 5,
+    'max_depth': 6,
+    'class_weight': {0: 1, 1: 12},
+    'n_jobs': 32
+    }
 
 classifiers = {
                 #'SVC-best1': LinearSVC(**svc_best1),
                 #'SVC-best2': LinearSVC(**svc_best2),
-                'RF-best1': RandomForestClassifier(**rf_best1),
-                'RF-best2': RandomForestClassifier(**rf_best2),
+                #'RF-best1': RandomForestClassifier(**rf_best1),
+                #'RF-best2': RandomForestClassifier(**rf_best2),
+                 'RF-best': RandomForestClassifier(**rf_best)
               }
 
 
@@ -151,7 +161,7 @@ if IMPORT_MODELS and os.path.exists(model_dir+"/pca/pca.pkl"):
     svd = load_model(model_dir+"/pca/pca.pkl")
 else:
     # 要執行這步，你/妳的 RAM 要夠大 (>8G 一定沒問題)
-    svd = PCA(n_components=100).fit(data) # 降維，維度太高會發生'維度災難'
+    svd = PCA(n_components=180).fit(data) # 降維，維度太高會發生'維度災難'
     if EXPORT_MODELS:
         with open(model_dir+"/pca/pca.pkl", "wb") as f: # export pca transformer
             pickle.dump(svd, f, pickle.HIGHEST_PROTOCOL)
