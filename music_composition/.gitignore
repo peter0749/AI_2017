@@ -1,3 +1,7 @@
 __pycache__/
 *.pyc
 output/*.wav
+# instrument-demo renders (MIDI is identical to piec_hybrid.mid; regenerable)
+output/piec_soft.*
+output/piec_epiano.*
+output/piec_flute.*
