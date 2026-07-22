@@ -40,11 +40,11 @@ def midi_to_hz(m: float) -> float:
 
 INSTRUMENTS = {
     "soft":   dict(harm=[1.0, 0.22, 0.08, 0.02], env="adsr",
-                   a=0.014, d=0.13, s=0.55, r=0.22, detune=5.0, vib=0.0030),
+                   a=0.014, d=0.13, s=0.55, r=0.22, detune=5.0, vib=0.0),
     "epiano": dict(harm=[1.0, 0.32, 0.11, 0.03], env="pluck",
                    a=0.005, decay=2.2, r=0.10, detune=4.0, vib=0.0),
     "flute":  dict(harm=[1.0, 0.05, 0.02], env="adsr",
-                   a=0.055, d=0.10, s=0.82, r=0.16, detune=0.0, vib=0.0045),
+                   a=0.055, d=0.10, s=0.82, r=0.16, detune=0.0, vib=0.0),
 }
 
 
