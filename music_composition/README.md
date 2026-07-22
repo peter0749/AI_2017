@@ -72,6 +72,11 @@ duration), the **chord of every bar**, the **scale** (C major), and the
 **genome** is just the list of MIDI pitches, one per note event; the GA only
 moves pitches. Pitches live on the C-major scale between C4 and C6.
 
+> The paper encodes each gene as an **integer in `1..25`** (a two-octave
+> chromatic span, `13` = octave landmark). We use scale-restricted MIDI
+> numbers directly, which is functionally equivalent but keeps every gene
+> in-key by construction — see *Reconstruction notes*.
+
 ## 4. The four fitness functions
 
 Each returns a value in `[0, 1]` (higher is better). The paper's exact
@@ -94,6 +99,13 @@ behaviour (see *Reconstruction notes*).
      tonic.
 - **hybrid = 0.5·NV + 0.5·RA** (paper's best). The CLI default nudges in a
   little IV too (`0.35 NV + 0.40 RA + 0.25 IV`) for smoother contours.
+
+These five rules are not ad-hoc: a multi-agent literature sweep confirmed the
+same heuristics recur across the evolutionary-composition literature —
+chord-tone weighting on strong beats, stepwise-motion preference, large-leap
+penalty with resolution, avoiding repeats, and cadence to the tonic — in
+Towsey et al.'s ~21 melodic features, Papadopoulos & Wiggins' eight jazz-melody
+criteria, and Özcan & Erçal's AMUSE (see §9).
 
 ## 5. Phrase imitation
 
@@ -132,17 +144,49 @@ this environment's network policy, so the following were reconstructed from
 abstracts, indexed snippets and standard music theory rather than copied from
 the paper:
 
+- **Chromosome encoding.** The paper uses an integer string with genes in
+  `1..25` (two-octave chromatic). We use scale-restricted MIDI numbers, so a
+  gene can never be out-of-scale to begin with; note fixing then handles chord
+  fit and cadence. Same search space in spirit, in-key by construction.
 - the exact NV distance metric and IV formula;
 - the precise wording of the five RA rules and their weighting;
 - GA hyper-parameters (population, generations, rates);
-- the mechanical details of intra-/inter-phrase rearrangement.
+- the mechanical details of intra-/inter-phrase rearrangement. The paper
+  describes two inter-phrase ideas — transposing phrases to match the sample's
+  phrase-to-phrase register ordering, and copying the best generated phrase
+  over its repeats. We implement the **repeated-phrase** variant (robust and
+  order-independent); phrase-register imitation is a natural extension.
 
 They are designed to match the *described behaviour* and produce musically
 coherent output. Given the paper PDF, each can be tightened to the original.
 
-## 9. Related work by the same group (for a report)
+## 9. Related work (for a report)
+
+By the same group:
 
 - C.-H. Liu, C.-K. Ting, *Evolutionary composition using music theory and
   charts*, IEEE CICAC/SSCI 2013 — the rule-based fitness predecessor.
 - C.-H. Liu, C.-K. Ting, *Computational Intelligence in Music Composition: A
   Survey*, IEEE TETCI 1(1):2–15, 2017 — taxonomy of CI composition methods.
+
+Broader EA-composition context that grounds the fitness design:
+
+- M. Towsey, A. Brown, S. Wright, J. Diederich, *Towards Melodic Extension
+  Using Genetic Algorithms*, Educational Technology & Society, 2001 — ~21
+  melodic features scored as distance-to-ideal (the template for feature-based
+  melodic fitness).
+- G. Papadopoulos, G. Wiggins, *A Genetic Algorithm for the Generation of Jazz
+  Melodies*, STeP 1998 — autonomous fitness = weighted sum of eight melodic
+  criteria (chord tone, interval size, note position, contour, motif
+  similarity).
+- J. Biles, *GenJam: A Genetic Algorithm for Generating Jazz Solos*, ICMC 1994
+  — the classic **interactive** GA (a human mentor supplies fitness); its
+  two-population measure/phrase encoding maps events onto a chord/scale so
+  notes are never out of key.
+- E. Özcan, T. Erçal, *A Genetic Algorithm for Generating Improvised Music*
+  (AMUSE), EA 2007 — fully autonomous GA, weighted sum of ten melodic/rhythmic
+  features.
+
+*(The related-work grounding above was assembled by a parallel multi-agent
+literature sweep; primary PDFs were paywalled/blocked in this environment, so
+citations are reconstructed from indexed metadata.)*
