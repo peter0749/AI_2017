@@ -22,6 +22,8 @@ def main():
     ap.add_argument("--pop", type=int, default=200)
     ap.add_argument("--seed", type=int, default=20170721)
     ap.add_argument("--out", default="piec_composition")
+    ap.add_argument("--instrument", default="soft",
+                    choices=["soft", "epiano", "flute"])
     ap.add_argument("--no-accomp", action="store_true")
     args = ap.parse_args()
 
@@ -48,7 +50,8 @@ def main():
 
     wav = os.path.join(out_dir, args.out + ".wav")
     mid = os.path.join(out_dir, args.out + ".mid")
-    render_wav(piece, best, wav, with_accompaniment=not args.no_accomp)
+    render_wav(piece, best, wav, with_accompaniment=not args.no_accomp,
+               instrument=args.instrument)
     render_midi(piece, best, mid)
     print(f"\nwrote {wav}\nwrote {mid}")
 
